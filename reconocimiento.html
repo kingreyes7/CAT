@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconocimiento de Maquinaria</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar (igual que en tus otras páginas) */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .logo img {
+            height: 60px;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: #3498db;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Sección de reconocimiento */
+        .recognition-section {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #3498db;
+            min-height: 400px;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #7f8c8d;
+        }
+        
+        .upload-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .upload-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .results-area {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+        }
+        
+        .results-title {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .equipment-info {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        .equipment-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .equipment-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .detail-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Especificaciones técnicas */
+        .specs-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .specs-table th, .specs-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .specs-table th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        /* Historial de mantenimiento */
+        .history-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .history-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-date {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .history-description {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="logo2.png" alt="Logo de la empresa">
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="equipos.html" class="nav-link"><i class="fas fa-tools"></i> Gestión de Equipos</a></li>
+                <li class="nav-item"><a href="prestamos.html" class="nav-link"><i class="fas fa-exchange-alt"></i> Préstamos</a></li>
+                <li class="nav-item"><a href="devoluciones.html" class="nav-link"><i class="fas fa-undo"></i> Devoluciones</a></li>
+                <li class="nav-item"><a href="mantenimiento.html" class="nav-link"><i class="fas fa-wrench"></i> Mantenimiento</a></li>
+                <li class="nav-item"><a href="reportes.html" class="nav-link"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                <li class="nav-item"><a href="reconocimiento.html" class="nav-link active"><i class="fas fa-camera"></i> Reconocimiento</a></li>
+                <li class="nav-item"><a href="usuarios.html" class="nav-link"><i class="fas fa-users"></i> Usuarios</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Reconocimiento de Maquinaria</h1>
+                <div class="user-info">
+                    <img src="inge.png" alt="Usuario">
+                    <span>Administrador</span>
+                </div>
+            </div>
+            
+            <!-- Sección de reconocimiento por imagen -->
+            <div class="recognition-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3 class="upload-text">Sube una foto de la maquinaria para identificar</h3>
+                    <button class="upload-button" id="uploadButton">Seleccionar Imagen</button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <img id="previewImage" class="preview-image" alt="Vista previa">
+                    
+                    <div class="loading" id="loadingIndicator">
+                        <div class="spinner"></div>
+                        <p>Analizando imagen...</p>
+                    </div>
+                </div>
+                
+                <div class="results-area" id="resultsArea">
+                    <h2 class="results-title">Información del Equipo</h2>
+                    <div id="emptyState">
+                        <p style="text-align: center; color: #7f8c8d; margin-top: 50px;">
+                            Los resultados aparecerán aquí después de subir una imagen.
+                        </p>
+                    </div>
+                    
+                    <div id="equipmentInfo" style="display: none;">
+                        <div class="equipment-info">
+                            <div>
+                                <img src="" alt="Equipo" class="equipment-image" id="equipmentImage">
+                            </div>
+                            <div class="equipment-details">
+                                <div class="detail-card">
+                                    <div class="detail-label">Tipo de Equipo</div>
+                                    <div class="detail-value" id="equipmentType">Excavadora</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Modelo</div>
+                                    <div class="detail-value" id="equipmentModel">CAT 320D</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Número de Serie</div>
+                                    <div class="detail-value" id="serialNumber">CAT0320DXZ45879</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Año</div>
+                                    <div class="detail-value" id="equipmentYear">2018</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Estado</div>
+                                    <div class="detail-value" id="equipmentStatus">Disponible</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Horas de Uso</div>
+                                    <div class="detail-value" id="usageHours">2,450</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Ubicación Actual</div>
+                                    <div class="detail-value" id="currentLocation">Almacén Central</div>
+                                </div>
+                                <div class="detail-card">
+                                    <div class="detail-label">Próximo Mantenimiento</div>
+                                    <div class="detail-value" id="nextMaintenance">15/08/2023</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Especificaciones técnicas -->
+            <div class="specs-section" id="specsSection" style="display: none;">
+                <h2 class="results-title">Especificaciones Técnicas</h2>
+                <table class="specs-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="specsTableBody">
+                        <tr>
+                            <td>Peso Operativo</td>
+                            <td>21,900 kg</td>
+                        </tr>
+                        <tr>
+                            <td>Potencia del Motor</td>
+                            <td>103 kW (138 hp)</td>
+                        </tr>
+                        <tr>
+                            <td>Capacidad del Cucharón</td>
+                            <td>0.91 - 1.26 m³</td>
+                        </tr>
+                        <tr>
+                            <td>Profundidad de Excavación</td>
+                            <td>6,640 mm</td>
+                        </tr>
+                        <tr>
+                            <td>Combustible</td>
+                            <td>Diésel</td>
+                        </tr>
+                        <tr>
+                            <td>Consumo Promedio</td>
+                            <td>12.5 L/h</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Historial de mantenimiento -->
+            <div class="history-section" id="historySection" style="display: none;">
+                <h2 class="results-title">Historial de Mantenimiento</h2>
+                <div class="history-item">
+                    <div class="history-date">10/06/2023 - Cambio de aceite y filtros</div>
+                    <div class="history-description">Se realizó cambio de aceite del motor, filtros de aceite, aire y combustible. Horómetro: 2,400</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-date">15/03/2023 - Revisión de sistema hidráulico</div>
+                    <div class="history-description">Revisión completa del sistema hidráulico, cambio de mangueras dañadas. Horómetro: 2,150</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-date">05/01/2023 - Mantenimiento preventivo</div>
+                    <div class="history-description">Mantenimiento preventivo programado. Revisión de tren de rodaje y sistema eléctrico. Horómetro: 1,900</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Funcionalidad para subir imágenes
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    const previewImage = document.getElementById('previewImage');
+                    previewImage.src = event.target.result;
+                    previewImage.style.display = 'block';
+                    
+                    // Mostrar indicador de carga
+                    document.getElementById('loadingIndicator').style.display = 'block';
+                    document.querySelector('.upload-text').style.display = 'none';
+                    document.getElementById('uploadButton').style.display = 'none';
+                    
+                    // Simular procesamiento de imagen (en un caso real, aquí iría la llamada a tu API de reconocimiento)
+                    setTimeout(function() {
+                        processImageRecognition(file);
+                    }, 2000);
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function processImageRecognition(file) {
+            // Ocultar indicador de carga
+            document.getElementById('loadingIndicator').style.display = 'none';
+            
+            // Mostrar resultados (esto es simulado - en una aplicación real usarías los datos de tu API)
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('equipmentInfo').style.display = 'block';
+            document.getElementById('specsSection').style.display = 'block';
+            document.getElementById('historySection').style.display = 'block';
+            
+            // Aquí normalmente actualizarías los datos con la respuesta de tu API
+            // Por ejemplo:
+            // document.getElementById('equipmentType').textContent = response.equipmentType;
+            // document.getElementById('equipmentModel').textContent = response.model;
+            // etc.
+            
+            // Para este ejemplo, usamos datos de demostración
+            document.getElementById('equipmentImage').src = document.getElementById('previewImage').src;
+        }
+        
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#2980b9';
+            uploadArea.style.backgroundColor = '#f0f8ff';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#3498db';
+            uploadArea.style.backgroundColor = 'white';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#3498db';
+            uploadArea.style.backgroundColor = 'white';
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.match('image.*')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    const previewImage = document.getElementById('previewImage');
+                    previewImage.src = event.target.result;
+                    previewImage.style.display = 'block';
+                    
+                    // Mostrar indicador de carga
+                    document.getElementById('loadingIndicator').style.display = 'block';
+                    document.querySelector('.upload-text').style.display = 'none';
+                    document.getElementById('uploadButton').style.display = 'none';
+                    
+                    // Simular procesamiento de imagen
+                    setTimeout(function() {
+                        processImageRecognition(file);
+                    }, 2000);
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

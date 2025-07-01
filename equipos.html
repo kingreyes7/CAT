@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Equipos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="icon" href="logo.png" type="image/png">
+    <link rel="shortcut icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <style>
+        /* Todos los estilos del dashboard */
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .logo img {
+            height: 60px;
+            max-width: 100%;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 250px;
+            transition: all 0.3s;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .page-title {
+            color: var(--dark);
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-bar input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 300px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        /* Filters */
+        .filters {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-group label {
+            margin-right: 10px;
+            color: var(--dark);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 14px;
+        }
+        
+        /* Equipment Table */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .equipment-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .equipment-table th, .equipment-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .equipment-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .equipment-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-assigned {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-maintenance {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+                overflow: hidden;
+            }
+            
+            .sidebar .logo span,
+            .sidebar .nav-link span {
+                display: none;
+            }
+            
+            .sidebar .nav-link {
+                justify-content: center;
+                padding: 12px 5px;
+            }
+            
+            .sidebar .nav-link i {
+                margin-right: 0;
+                font-size: 1.2rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .action-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-bar input {
+                width: 100%;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="logo2.png" alt="Logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="gestion-equipos.html" class="nav-link active"><i class="fas fa-tools"></i> <span>Equipos</span></a></li>
+            <li class="nav-item"><a href="prestamos.html" class="nav-link"><i class="fas fa-exchange-alt"></i> <span>Préstamos</span></a></li>
+            <li class="nav-item"><a href="devoluciones.html" class="nav-link"><i class="fas fa-undo"></i> <span>Devoluciones</span></a></li>
+            <li class="nav-item"><a href="mantenimiento.html" class="nav-link"><i class="fas fa-wrench"></i> <span>Mantenimiento</span></a></li>
+            <li class="nav-item"><a href="reportes.html" class="nav-link"><i class="fas fa-chart-bar"></i> <span>Reportes</span></a></li>
+            <li class="nav-item"><a href="usuarios.html" class="nav-link"><i class="fas fa-users"></i> <span>Usuarios</span></a></li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">Gestión de Equipos</h1>
+            <div class="user-info">
+                <img src="inge.png" alt="Usuario">
+                <span>Administrador</span>
+            </div>
+        </div>
+        
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar equipos...">
+                <button class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            <button class="btn btn-success" onclick="location.href='registrar-equipo.html'"><i class="fas fa-plus"></i> Nuevo Equipo</button>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filter-type">Tipo:</label>
+                <select id="filter-type">
+                    <option value="all">Todos</option>
+                    <option value="maquinaria">Maquinaria</option>
+                    <option value="herramienta">Herramienta</option>
+                    <option value="vehiculo">Vehículo</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filter-status">Estado:</label>
+                <select id="filter-status">
+                    <option value="all">Todos</option>
+                    <option value="available">Disponible</option>
+                    <option value="assigned">Asignado</option>
+                    <option value="maintenance">En Mantenimiento</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filter-location">Ubicación:</label>
+                <select id="filter-location">
+                    <option value="all">Todas</option>
+                    <option value="almacen">Almacén Principal</option>
+                    <option value="obra1">Obra Torre Norte</option>
+                    <option value="obra2">Obra Plaza Central</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Equipment Table -->
+        <div class="table-container">
+            <table class="equipment-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Marca/Modelo</th>
+                        <th>N° Serie</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>EQ-001</td>
+                        <td>Excavadora</td>
+                        <td>Caterpillar 320D</td>
+                        <td>CAT-320D-001</td>
+                        <td>Almacén Principal</td>
+                        <td><span class="status status-available">Disponible</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>EQ-002</td>
+                        <td>Martillo Demoledor</td>
+                        <td>Bosch GSH 11 E</td>
+                        <td>BOS-GSH11-045</td>
+                        <td>Obra Torre Norte</td>
+                        <td><span class="status status-assigned">Asignado</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" disabled><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>EQ-003</td>
+                        <td>Compresor</td>
+                        <td>Ingersoll Rand XP750</td>
+                        <td>IR-XP750-112</td>
+                        <td>Taller Mantenimiento</td>
+                        <td><span class="status status-maintenance">En Mantenimiento</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" disabled><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>EQ-004</td>
+                        <td>Andamio</td>
+                        <td>Aluma 5000</td>
+                        <td>ALU-5000-321</td>
+                        <td>Almacén Principal</td>
+                        <td><span class="status status-available">Disponible</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filtros interactivos
+            const filterType = document.getElementById('filter-type');
+            const filterStatus = document.getElementById('filter-status');
+            const filterLocation = document.getElementById('filter-location');
+            const searchInput = document.querySelector('.search-bar input');
+            const rows = document.querySelectorAll('.equipment-table tbody tr');
+            
+            function applyFilters() {
+                const typeValue = filterType.value;
+                const statusValue = filterStatus.value;
+                const locationValue = filterLocation.value;
+                const searchValue = searchInput.value.toLowerCase();
+                
+                rows.forEach(row => {
+                    const type = row.cells[1].textContent.toLowerCase();
+                    const status = row.cells[5].textContent.toLowerCase();
+                    const location = row.cells[4].textContent.toLowerCase();
+                    const allText = row.textContent.toLowerCase();
+                    
+                    const typeMatch = typeValue === 'all' || type.includes(typeValue);
+                    const statusMatch = statusValue === 'all' || status.includes(statusValue);
+                    const locationMatch = locationValue === 'all' || location.includes(locationValue);
+                    const searchMatch = allText.includes(searchValue);
+                    
+                    if (typeMatch && statusMatch && locationMatch && searchMatch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+            
+            filterType.addEventListener('change', applyFilters);
+            filterStatus.addEventListener('change', applyFilters);
+            filterLocation.addEventListener('change', applyFilters);
+            searchInput.addEventListener('input', applyFilters);
+            
+            // Botones de acción
+            document.querySelectorAll('.btn-danger').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (!confirm('¿Está seguro de eliminar este equipo?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

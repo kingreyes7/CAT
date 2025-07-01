@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="icon" href="logo.png" type="image/png">
+    <link rel="shortcut icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .logo img {
+            height: 60px;
+            max-width: 100%;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 250px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .page-title {
+            color: var(--dark);
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .users-table th, .users-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .users-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-admin {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-supervisor {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-operario {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .btn i {
+            margin-right: 5px;
+        }
+        
+        .btn-view {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 50%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .modal-body {
+            margin-top: 20px;
+        }
+
+        .user-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            margin-bottom: 10px;
+        }
+
+        .info-item label {
+            font-weight: 600;
+            color: var(--dark);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            display: block;
+            padding: 8px 10px;
+            background-color: var(--light);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="logo2.png" alt="Logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="equipos.html" class="nav-link"><i class="fas fa-tools"></i> <span>Equipos</span></a></li>
+            <li class="nav-item"><a href="prestamos.html" class="nav-link"><i class="fas fa-exchange-alt"></i> <span>Préstamos</span></a></li>
+            <li class="nav-item"><a href="devoluciones.html" class="nav-link"><i class="fas fa-undo"></i> <span>Devoluciones</span></a></li>
+            <li class="nav-item"><a href="mantenimiento.html" class="nav-link"><i class="fas fa-wrench"></i> <span>Mantenimiento</span></a></li>
+            <li class="nav-item"><a href="reportes.html" class="nav-link"><i class="fas fa-chart-bar"></i> <span>Reportes</span></a></li>
+            <li class="nav-item"><a href="usuarios.html" class="nav-link active"><i class="fas fa-users"></i> <span>Usuarios</span></a></li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">Gestión de Usuarios</h1>
+            <div class="user-info">
+                <img src="inge.png" alt="Usuario">
+                <span>Administrador</span>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img src="ingenierouye.png" class="user-avatar">
+                            Said Alferez Andia
+                        </td>
+                        <td>said@cat.com.pe</td>
+                        <td><span class="badge badge-admin">Administrador</span></td>
+                        <td>Activo</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-view" data-user-id="1"><i class="fas fa-eye"></i> Ver</button>
+                                <button class="btn btn-edit"><i class="fas fa-edit"></i> Editar</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="supervisor.jpg" class="user-avatar">
+                            Sandro Miñope Reyes
+                        </td>
+                        <td>sandro@cat.com.pe</td>
+                        <td><span class="badge badge-supervisor">Supervisora</span></td>
+                        <td>Activo</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-view" data-user-id="2"><i class="fas fa-eye"></i> Ver</button>
+                                <button class="btn btn-edit"><i class="fas fa-edit"></i> Editar</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="operario.jpg" class="user-avatar">
+                            Adrián Ordinola Moscoso
+                        </td>
+                        <td>adrian@cat.com.pe</td>
+                        <td><span class="badge badge-operario">Operario</span></td>
+                        <td>Activo</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-view" data-user-id="3"><i class="fas fa-eye"></i> Ver</button>
+                                <button class="btn btn-edit"><i class="fas fa-edit"></i> Editar</button>
+                                <button class="btn btn-delete"><i class="fas fa-trash"></i> Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles del usuario -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Detalles del Usuario</h2>
+            <div class="modal-body">
+                <div class="user-detail">
+                    <img id="modalUserAvatar" src="" alt="Avatar" class="modal-avatar">
+                    <h3 id="modalUserName"></h3>
+                </div>
+                <div class="user-info-grid">
+                    <div class="info-item">
+                        <label>Email:</label>
+                        <span id="modalUserEmail"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Rol:</label>
+                        <span id="modalUserRole"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Estado:</label>
+                        <span id="modalUserStatus"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Fecha de registro:</label>
+                        <span id="modalUserDate"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Teléfono:</label>
+                        <span id="modalUserPhone"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Departamento:</label>
+                        <span id="modalUserDepartment"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datos de ejemplo para los usuarios (en un caso real, estos vendrían de una API o base de datos)
+            const usersData = {
+                1: {
+                    name: "Said Alferez Andia",
+                    avatar: "ingenierouye.png",
+                    email: "said@cat.com.pe",
+                    role: "Administrador",
+                    status: "Activo",
+                    registerDate: "15/03/2022",
+                    phone: "+51 987 654 321",
+                    department: "TI"
+                },
+                2: {
+                    name: "Sandro Miñope Reyes",
+                    avatar: "supervisor.jpg",
+                    email: "sandro@cat.com.pe",
+                    role: "Supervisor",
+                    status: "Activo",
+                    registerDate: "22/05/2021",
+                    phone: "+51 987 123 456",
+                    department: "Operaciones"
+                },
+                3: {
+                    name: "Adrián Ordinola Moscoso",
+                    avatar: "operario.jpg",
+                    email: "adrian@cat.com.pe",
+                    role: "Operario",
+                    status: "Activo",
+                    registerDate: "10/10/2023",
+                    phone: "+51 987 789 123",
+                    department: "Producción"
+                }
+            };
+
+            // Obtener elementos del modal
+            const modal = document.getElementById('userModal');
+            const closeModal = document.querySelector('.close-modal');
+            
+            // Configurar botones "Ver"
+            document.querySelectorAll('.btn-view').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const userData = usersData[userId];
+                    
+                    if (userData) {
+                        // Llenar el modal con los datos del usuario
+                        document.getElementById('modalUserAvatar').src = userData.avatar;
+                        document.getElementById('modalUserName').textContent = userData.name;
+                        document.getElementById('modalUserEmail').textContent = userData.email;
+                        document.getElementById('modalUserRole').textContent = userData.role;
+                        document.getElementById('modalUserStatus').textContent = userData.status;
+                        document.getElementById('modalUserDate').textContent = userData.registerDate;
+                        document.getElementById('modalUserPhone').textContent = userData.phone;
+                        document.getElementById('modalUserDepartment').textContent = userData.department;
+                        
+                        // Mostrar el modal
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Cerrar modal al hacer clic en la X
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Cerrar modal al hacer clic fuera del contenido
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Confirmación para eliminar usuario
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if(!confirm('¿Está seguro de eliminar este usuario?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+            
+            // Simular carga de datos
+            console.log("Página de usuarios cargada correctamente");
+        });
+    </script>
+</body>
+</html>

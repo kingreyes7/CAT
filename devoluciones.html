@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devoluciones - Gestión de Equipos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .logo img {
+            height: 60px;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: #3498db;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #3498db10;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #f39c1220;
+            color: #f39c12;
+        }
+        
+        .status-completed {
+            background-color: #2ecc7120;
+            color: #27ae60;
+        }
+        
+        .status-damaged {
+            background-color: #e74c3c20;
+            color: #e74c3c;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        /* Form Styles */
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .btn-submit {
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .btn-submit:hover {
+            background-color: #27ae60;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .checkbox-group {
+            margin: 15px 0;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group input {
+            margin-right: 10px;
+        }
+
+        /* Resultados de búsqueda */
+        .search-results {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .search-results table {
+            margin: 0;
+        }
+
+        .search-results th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .no-results {
+            padding: 15px;
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .highlight {
+            background-color: #fffde7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="logo2.png" alt="Logo de la empresa">
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="equipos.html" class="nav-link"><i class="fas fa-tools"></i> Gestión de Equipos</a></li>
+                <li class="nav-item"><a href="prestamos.html" class="nav-link"><i class="fas fa-exchange-alt"></i> Préstamos</a></li>
+                <li class="nav-item"><a href="devoluciones.html" class="nav-link active"><i class="fas fa-undo"></i> Devoluciones</a></li>
+                <li class="nav-item"><a href="mantenimiento.html" class="nav-link"><i class="fas fa-wrench"></i> Mantenimiento</a></li>
+                <li class="nav-item"><a href="reportes.html" class="nav-link"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                <li class="nav-item"><a href="usuarios.html" class="nav-link"><i class="fas fa-users"></i> Usuarios</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Devoluciones de Equipos</h1>
+                <div class="user-info">
+                    <img src="inge.png" alt="Usuario">
+                    <span>Administrador</span>
+                </div>
+            </div>
+            
+            <!-- Formulario de búsqueda de préstamos -->
+            <div class="form-container">
+                <h2 class="section-title">Registrar Devolución</h2>
+                <form id="buscarPrestamoForm">
+                    <div class="form-group">
+                        <label for="buscarPrestamo">Buscar Préstamo</label>
+                        <div class="form-row">
+                            <input type="text" id="buscarPrestamo" class="form-control" placeholder="ID de préstamo o nombre de equipo">
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Resultados de búsqueda -->
+                <div id="searchResultsContainer" class="search-results" style="display: none;">
+                    <h3 class="section-title">Resultados de Búsqueda</h3>
+                    <div id="searchResults"></div>
+                </div>
+            </div>
+            
+            <!-- Lista de préstamos pendientes de devolución -->
+            <div class="table-container">
+                <h2 class="section-title">Préstamos Pendientes de Devolución</h2>
+                <table id="pendientesTable">
+                    <thead>
+                        <tr>
+                            <th>ID Préstamo</th>
+                            <th>Equipo</th>
+                            <th>Responsable</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Fecha Devolución</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-id="PR-1001" data-equipo="Excavadora EXC-023" data-responsable="Juan Pérez - Torre Norte">
+                            <td>PR-1001</td>
+                            <td>Excavadora EXC-023</td>
+                            <td>Juan Pérez - Torre Norte</td>
+                            <td>15/06/2023</td>
+                            <td>30/06/2023</td>
+                            <td><span class="status status-pending">Pendiente</span></td>
+                            <td>
+                                <button class="action-btn btn-success" onclick="openReturnModal('PR-1001')">
+                                    <i class="fas fa-check"></i> Registrar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-id="PR-1002" data-equipo="Martillo MART-456" data-responsable="María Gómez - Centro">
+                            <td>PR-1002</td>
+                            <td>Martillo MART-456</td>
+                            <td>María Gómez - Centro</td>
+                            <td>18/06/2023</td>
+                            <td>25/06/2023</td>
+                            <td><span class="status status-pending">Vencido</span></td>
+                            <td>
+                                <button class="action-btn btn-success" onclick="openReturnModal('PR-1002')">
+                                    <i class="fas fa-check"></i> Registrar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-id="PR-1003" data-equipo="Compactadora COMP-789" data-responsable="Carlos Ruiz - Sur">
+                            <td>PR-1003</td>
+                            <td>Compactadora COMP-789</td>
+                            <td>Carlos Ruiz - Sur</td>
+                            <td>20/06/2023</td>
+                            <td>05/07/2023</td>
+                            <td><span class="status status-pending">Pendiente</span></td>
+                            <td>
+                                <button class="action-btn btn-success" onclick="openReturnModal('PR-1003')">
+                                    <i class="fas fa-check"></i> Registrar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Historial de devoluciones recientes -->
+            <div class="table-container">
+                <h2 class="section-title">Devoluciones Recientes</h2>
+                <table id="devolucionesTable">
+                    <thead>
+                        <tr>
+                            <th>ID Devolución</th>
+                            <th>ID Préstamo</th>
+                            <th>Equipo</th>
+                            <th>Fecha Devolución</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-id="DEV-0056" data-prestamo="PR-0998" data-equipo="Excavadora EXC-023">
+                            <td>DEV-0056</td>
+                            <td>PR-0998</td>
+                            <td>Excavadora EXC-023</td>
+                            <td>10/06/2023</td>
+                            <td><span class="status status-completed">Completado</span></td>
+                            <td>
+                                <button class="action-btn btn-primary">
+                                    <i class="fas fa-eye"></i> Detalles
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-id="DEV-0057" data-prestamo="PR-0999" data-equipo="Martillo MART-456">
+                            <td>DEV-0057</td>
+                            <td>PR-0999</td>
+                            <td>Martillo MART-456</td>
+                            <td>15/06/2023</td>
+                            <td><span class="status status-damaged">Con Daños</span></td>
+                            <td>
+                                <button class="action-btn btn-primary">
+                                    <i class="fas fa-eye"></i> Detalles
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-id="DEV-0058" data-prestamo="PR-1000" data-equipo="Compactadora COMP-789">
+                            <td>DEV-0058</td>
+                            <td>PR-1000</td>
+                            <td>Compactadora COMP-789</td>
+                            <td>18/06/2023</td>
+                            <td><span class="status status-completed">Completado</span></td>
+                            <td>
+                                <button class="action-btn btn-primary">
+                                    <i class="fas fa-eye"></i> Detalles
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para registrar devolución -->
+    <div class="modal" id="returnModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Registrar Devolución</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="devolucionForm">
+                <input type="hidden" id="prestamoId">
+                
+                <div class="form-group">
+                    <label for="fechaDevolucionReal">Fecha de Devolución Real</label>
+                    <input type="date" id="fechaDevolucionReal" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="condicionEquipo">Condición del Equipo</label>
+                    <select id="condicionEquipo" class="form-control" required>
+                        <option value="">Seleccionar condición</option>
+                        <option value="bueno">Buen estado</option>
+                        <option value="danos_menores">Daños menores</option>
+                        <option value="danos_graves">Daños graves</option>
+                        <option value="no_funciona">No funciona</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacionesDevolucion">Observaciones</label>
+                    <textarea id="observacionesDevolucion" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="necesitaMantenimiento"> El equipo necesita mantenimiento
+                    </label>
+                    <label>
+                        <input type="checkbox" id="reportarDanos"> Reportar daños al responsable
+                    </label>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="action-btn btn-primary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="action-btn btn-success">
+                        <i class="fas fa-check"></i> Confirmar Devolución
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Datos de ejemplo para búsqueda (en una aplicación real, esto vendría de una API)
+        const prestamosData = [
+            {
+                id: "PR-1001",
+                equipo: "Excavadora EXC-023",
+                responsable: "Juan Pérez - Torre Norte",
+                fechaPrestamo: "15/06/2023",
+                fechaDevolucion: "30/06/2023",
+                estado: "Pendiente"
+            },
+            {
+                id: "PR-1002",
+                equipo: "Martillo MART-456",
+                responsable: "María Gómez - Centro",
+                fechaPrestamo: "18/06/2023",
+                fechaDevolucion: "25/06/2023",
+                estado: "Vencido"
+            },
+            {
+                id: "PR-1003",
+                equipo: "Compactadora COMP-789",
+                responsable: "Carlos Ruiz - Sur",
+                fechaPrestamo: "20/06/2023",
+                fechaDevolucion: "05/07/2023",
+                estado: "Pendiente"
+            }
+        ];
+
+        const devolucionesData = [
+            {
+                id: "DEV-0056",
+                prestamoId: "PR-0998",
+                equipo: "Excavadora EXC-023",
+                fechaDevolucion: "10/06/2023",
+                estado: "Completado"
+            },
+            {
+                id: "DEV-0057",
+                prestamoId: "PR-0999",
+                equipo: "Martillo MART-456",
+                fechaDevolucion: "15/06/2023",
+                estado: "Con Daños"
+            },
+            {
+                id: "DEV-0058",
+                prestamoId: "PR-1000",
+                equipo: "Compactadora COMP-789",
+                fechaDevolucion: "18/06/2023",
+                estado: "Completado"
+            }
+        ];
+
+        // Función para abrir el modal de devolución
+        function openReturnModal(prestamoId) {
+            document.getElementById('prestamoId').value = prestamoId;
+            document.getElementById('returnModal').style.display = 'flex';
+            
+            // Aquí podrías cargar los datos del préstamo si es necesario
+            console.log('Preparando devolución para préstamo:', prestamoId);
+        }
+        
+        // Función para cerrar el modal
+        function closeModal() {
+            document.getElementById('returnModal').style.display = 'none';
+        }
+        
+        // Manejar el envío del formulario de devolución
+        document.getElementById('devolucionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const prestamoId = document.getElementById('prestamoId').value;
+            const fechaDevolucion = document.getElementById('fechaDevolucionReal').value;
+            const condicion = document.getElementById('condicionEquipo').value;
+            
+            // Aquí iría la lógica para registrar la devolución
+            alert(`Devolución registrada para préstamo ${prestamoId}\nFecha: ${fechaDevolucion}\nCondición: ${condicion}`);
+            
+            // Cerrar el modal y limpiar el formulario
+            closeModal();
+            this.reset();
+            
+            // En una aplicación real, aquí se actualizaría la lista de préstamos y devoluciones
+        });
+        
+        // Función para buscar préstamos
+        function searchPrestamos(term) {
+            term = term.toLowerCase().trim();
+            
+            // Buscar en préstamos pendientes
+            const pendientesRows = document.querySelectorAll('#pendientesTable tbody tr');
+            let foundInPendientes = false;
+            
+            pendientesRows.forEach(row => {
+                const id = row.getAttribute('data-id').toLowerCase();
+                const equipo = row.getAttribute('data-equipo').toLowerCase();
+                const responsable = row.getAttribute('data-responsable').toLowerCase();
+                
+                if (id.includes(term) || equipo.includes(term) || responsable.includes(term)) {
+                    row.style.display = '';
+                    foundInPendientes = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Buscar en devoluciones recientes
+            const devolucionesRows = document.querySelectorAll('#devolucionesTable tbody tr');
+            let foundInDevoluciones = false;
+            
+            devolucionesRows.forEach(row => {
+                const id = row.getAttribute('data-id').toLowerCase();
+                const prestamo = row.getAttribute('data-prestamo').toLowerCase();
+                const equipo = row.getAttribute('data-equipo').toLowerCase();
+                
+                if (id.includes(term) || prestamo.includes(term) || equipo.includes(term)) {
+                    row.style.display = '';
+                    foundInDevoluciones = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Mostrar resultados en el contenedor de búsqueda
+            const resultsContainer = document.getElementById('searchResultsContainer');
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (term === '') {
+                resultsContainer.style.display = 'none';
+                // Mostrar todas las filas nuevamente
+                pendientesRows.forEach(row => row.style.display = '');
+                devolucionesRows.forEach(row => row.style.display = '');
+                return;
+            }
+            
+            resultsContainer.style.display = 'block';
+            
+            if (!foundInPendientes && !foundInDevoluciones) {
+                resultsDiv.innerHTML = '<div class="no-results">No se encontraron resultados para "' + term + '"</div>';
+                return;
+            }
+            
+            let resultsHTML = '<table>';
+            resultsHTML += '<thead><tr><th>Tipo</th><th>ID</th><th>Equipo</th><th>Detalles</th><th>Acciones</th></tr></thead><tbody>';
+            
+            // Agregar resultados de préstamos pendientes
+            pendientesRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const id = row.getAttribute('data-id');
+                    const equipo = row.getAttribute('data-equipo');
+                    const responsable = row.getAttribute('data-responsable');
+                    
+                    resultsHTML += `
+                        <tr>
+                            <td>Préstamo</td>
+                            <td>${id}</td>
+                            <td>${equipo}</td>
+                            <td>${responsable}</td>
+                            <td>
+                                <button class="action-btn btn-success" onclick="openReturnModal('${id}')">
+                                    <i class="fas fa-check"></i> Registrar Devolución
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            // Agregar resultados de devoluciones
+            devolucionesRows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const id = row.getAttribute('data-id');
+                    const prestamo = row.getAttribute('data-prestamo');
+                    const equipo = row.getAttribute('data-equipo');
+                    
+                    resultsHTML += `
+                        <tr>
+                            <td>Devolución</td>
+                            <td>${id}</td>
+                            <td>${equipo}</td>
+                            <td>Préstamo: ${prestamo}</td>
+                            <td>
+                                <button class="action-btn btn-primary">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            resultsHTML += '</tbody></table>';
+            resultsDiv.innerHTML = resultsHTML;
+            
+            // Resaltar el término buscado en los resultados
+            if (term.length > 2) {
+                const regex = new RegExp(term, 'gi');
+                resultsDiv.innerHTML = resultsDiv.innerHTML.replace(regex, match => 
+                    `<span class="highlight">${match}</span>`
+                );
+            }
+        }
+        
+        // Manejar el formulario de búsqueda
+        document.getElementById('buscarPrestamoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const termino = document.getElementById('buscarPrestamo').value;
+            searchPrestamos(termino);
+        });
+        
+        // Buscar automáticamente al escribir (con debounce para mejor performance)
+        let searchTimeout;
+        document.getElementById('buscarPrestamo').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const termino = this.value;
+                searchPrestamos(termino);
+            }, 300);
+        });
+    </script>
+</body>
+</html>

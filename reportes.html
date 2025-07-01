@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Gestión de Equipos</title>
+        <link rel="icon" href="logo.png" type="image/png">
+    <link rel="shortcut icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <!-- Incluir jsPDF y html2canvas para la generación de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .logo img {
+            height: 60px;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: #3498db;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Filtros de Reportes */
+        .report-filters {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            flex: 1;
+        }
+        
+        .filter-label {
+            display: block;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: white;
+        }
+        
+        .filter-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .filter-button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Gráficos y Tablas */
+        .report-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            height: 450px;
+            margin-bottom: 30px;
+            position: relative;
+            width: 100%;
+        }
+        
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .report-table th, .report-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .report-table th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .report-table tr:hover {
+            background-color: #f5f7fa;
+        }
+        
+        .export-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .export-button {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .export-button:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .export-button.pdf {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .export-button.excel {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        
+        .export-button.print {
+            border-color: #3498db;
+            color: #3498db;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .report-section, .report-section * {
+                visibility: visible;
+            }
+            .report-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                page-break-after: always;
+            }
+            .export-buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="logo2.png" alt="Logo de la empresa">
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="equipos.html" class="nav-link"><i class="fas fa-tools"></i> Gestión de Equipos</a></li>
+                <li class="nav-item"><a href="prestamos.html" class="nav-link"><i class="fas fa-exchange-alt"></i> Préstamos</a></li>
+                <li class="nav-item"><a href="devoluciones.html" class="nav-link"><i class="fas fa-undo"></i> Devoluciones</a></li>
+                <li class="nav-item"><a href="mantenimiento.html" class="nav-link"><i class="fas fa-wrench"></i> Mantenimiento</a></li>
+                <li class="nav-item"><a href="reportes.html" class="nav-link active"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                <li class="nav-item"><a href="usuarios.html" class="nav-link"><i class="fas fa-users"></i> Usuarios</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Reportes</h1>
+                <div class="user-info">
+                    <img src="inge.png" alt="Usuario">
+                    <span>Administrador</span>
+                </div>
+            </div>
+            
+            <!-- Filtros de Reportes -->
+            <div class="report-filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo de Reporte</label>
+                        <select class="filter-select">
+                            <option value="prestamos">Préstamos de Equipos</option>
+                            <option value="mantenimiento">Mantenimientos</option>
+                            <option value="disponibilidad">Disponibilidad</option>
+                            <option value="utilizacion">Utilización</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Fecha Inicio</label>
+                        <input type="date" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Fecha Fin</label>
+                        <input type="date" class="filter-input">
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo de Equipo</label>
+                        <select class="filter-select">
+                            <option value="todos">Todos</option>
+                            <option value="excavadoras">Excavadoras</option>
+                            <option value="martillos">Martillos</option>
+                            <option value="andamios">Andamios</option>
+                            <option value="compresores">Compresores</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Obra/Proyecto</label>
+                        <select class="filter-select">
+                            <option value="todos">Todos</option>
+                            <option value="torre-norte">Torre Norte</option>
+                            <option value="centro-comercial">Centro Comercial</option>
+                            <option value="puente">Puente Sur</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="align-self: flex-end;">
+                        <button class="filter-button">Generar Reporte</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráfico de Reporte -->
+            <div class="report-section" id="grafico-reporte">
+                <h2 class="section-title">Préstamos por Tipo de Equipo (Últimos 30 días)</h2>
+                <div class="chart-container">
+                    <!-- Aquí iría el gráfico generado por una biblioteca como Chart.js -->
+                    <img src="graficoxd.png" alt="Gráfico de préstamos" style="width: 100%; height: 100%; object-fit: contain; background-color: #f8f9fa;">
+                </div>
+                <div class="export-buttons">
+                    <button class="export-button pdf" onclick="exportToPDF('grafico-reporte', 'reporte_grafico.pdf')"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                    <button class="export-button excel"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                    <button class="export-button print" onclick="printSection('grafico-reporte')"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+            </div>
+            
+            <!-- Tabla de Datos -->
+            <div class="report-section" id="tabla-prestamos">
+                <h2 class="section-title">Detalle de Préstamos</h2>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID Préstamo</th>
+                            <th>Equipo</th>
+                            <th>Tipo</th>
+                            <th>Obra</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Fecha Devolución</th>
+                            <th>Responsable</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PR-2023-0456</td>
+                            <td>EXC-023</td>
+                            <td>Excavadora</td>
+                            <td>Torre Norte</td>
+                            <td>15/06/2023</td>
+                            <td>30/06/2023</td>
+                            <td>Juan Pérez</td>
+                            <td>Activo</td>
+                        </tr>
+                        <tr>
+                            <td>PR-2023-0455</td>
+                            <td>MART-456</td>
+                            <td>Martillo</td>
+                            <td>Centro Comercial</td>
+                            <td>10/06/2023</td>
+                            <td>25/06/2023</td>
+                            <td>María Gómez</td>
+                            <td>Devuelto</td>
+                        </tr>
+                        <tr>
+                            <td>PR-2023-0454</td>
+                            <td>ANDAM-321</td>
+                            <td>Andamio</td>
+                            <td>Puente Sur</td>
+                            <td>05/06/2023</td>
+                            <td>20/06/2023</td>
+                            <td>Carlos Ruiz</td>
+                            <td>Devuelto</td>
+                        </tr>
+                        <tr>
+                            <td>PR-2023-0453</td>
+                            <td>COMP-789</td>
+                            <td>Compresor</td>
+                            <td>Torre Norte</td>
+                            <td>01/06/2023</td>
+                            <td>15/06/2023</td>
+                            <td>Ana López</td>
+                            <td>Devuelto</td>
+                        </tr>
+                        <tr>
+                            <td>PR-2023-0452</td>
+                            <td>EXC-015</td>
+                            <td>Excavadora</td>
+                            <td>Centro Comercial</td>
+                            <td>28/05/2023</td>
+                            <td>12/06/2023</td>
+                            <td>Luis Martínez</td>
+                            <td>Devuelto</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="export-buttons">
+                    <button class="export-button pdf" onclick="exportToPDF('tabla-prestamos', 'reporte_prestamos.pdf')"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                    <button class="export-button excel"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                    <button class="export-button print" onclick="printSection('tabla-prestamos')"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+            </div>
+            
+            <!-- Reporte de Mantenimientos -->
+            <div class="report-section" id="tabla-mantenimientos">
+                <h2 class="section-title">Mantenimientos Programados</h2>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>Tipo</th>
+                            <th>Último Mantenimiento</th>
+                            <th>Próximo Mantenimiento</th>
+                            <th>Horas de Uso</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>EXC-023</td>
+                            <td>Excavadora</td>
+                            <td>15/05/2023</td>
+                            <td>15/07/2023</td>
+                            <td>230</td>
+                            <td>En Uso</td>
+                        </tr>
+                        <tr>
+                            <td>MART-456</td>
+                            <td>Martillo</td>
+                            <td>01/06/2023</td>
+                            <td>01/08/2023</td>
+                            <td>150</td>
+                            <td>Disponible</td>
+                        </tr>
+                        <tr>
+                            <td>COMP-789</td>
+                            <td>Compresor</td>
+                            <td>10/06/2023</td>
+                            <td>10/08/2023</td>
+                            <td>180</td>
+                            <td>En Mantenimiento</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="export-buttons">
+                    <button class="export-button pdf" onclick="exportToPDF('tabla-mantenimientos', 'reporte_mantenimientos.pdf')"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                    <button class="export-button excel"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                    <button class="export-button print" onclick="printSection('tabla-mantenimientos')"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Inicializar jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Función para exportar a PDF
+        function exportToPDF(elementId, filename) {
+            const element = document.getElementById(elementId);
+            
+            // Opciones para html2canvas
+            const options = {
+                scale: 2, // Aumentar la escala para mejor calidad
+                useCORS: true, // Permitir imágenes de origen cruzado
+                allowTaint: true, // Permitir contenido "tainted"
+                scrollX: 0,
+                scrollY: 0
+            };
+            
+            // Usar html2canvas para capturar el elemento como imagen
+            html2canvas(element, options).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm'
+                });
+                
+                // Calcular dimensiones para que quepa en la página A4
+                const imgWidth = 210; // Ancho A4 en mm
+                const pageHeight = 295; // Altura A4 en mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // Agregar primera página
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // Agregar páginas adicionales si el contenido es muy largo
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Guardar el PDF
+                pdf.save(filename);
+            });
+        }
+        
+        // Función para imprimir una sección específica
+        function printSection(elementId) {
+            const element = document.getElementById(elementId);
+            const originalContents = document.body.innerHTML;
+            
+            // Crear una ventana de impresión
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Imprimir Reporte</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write(`
+                body { font-family: Arial; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #f2f2f2; }
+                .section-title { color: #2c3e50; margin-bottom: 15px; }
+                .chart-container { margin-bottom: 20px; }
+            `);
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(element.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            
+            // Esperar a que se cargue el contenido antes de imprimir
+            printWindow.onload = function() {
+                printWindow.print();
+                printWindow.close();
+            };
+        }
+        
+        // También se puede usar la función nativa de impresión del navegador
+        function printPage() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
